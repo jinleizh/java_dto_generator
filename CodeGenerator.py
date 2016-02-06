@@ -332,7 +332,7 @@ if __name__ == "__main__":
     CodeGenerator.set_option_json_property(True)
     CodeGenerator.set_option_json_serialize(False)
     module_list = [
-        "com.webank.test",
+        "com.test.test",
     ]
     CodeGenerator.add_import_module(module_list)
     CodeGenerator.gen()
