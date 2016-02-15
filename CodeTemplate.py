@@ -25,7 +25,7 @@ tpl_class_definition_end = "}"
 tpl_property_definition = "    private %s %s;"
 
 tpl_property_comment = """    /**
-    *
+    * %s
     */"""
 
 tpl_function_definition_set = """    public void set%s(%s %s) {
@@ -58,7 +58,6 @@ import_json_property = [
 import_json_serialize = [
     "com.fasterxml.jackson.databind.annotation.JsonSerialize",
 ]
-
 
 java_template = dict(
         copy_right=tpl_copy_right,

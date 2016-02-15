@@ -6,8 +6,8 @@ import re
 class CamelTransformTool(object):
     """
     驼峰格式转换工具类
-    """
 
+    """
     def __init__(self):
         pass
 
@@ -61,5 +61,9 @@ class CamelTransformTool(object):
 
 
 if __name__ == "__main__":
-    print CamelTransformTool.trans_underline_field_to_camel_field("OPEN_ID_HELLOWORLD")
+    print CamelTransformTool.trans_underline_field_to_camel_field("OPEN_ID_HELLO_WORLD")
     print CamelTransformTool.trans_underline_field_to_camel_classname("open_id_sheet")
+    print str(None)
+    if True:
+        c = 5
+    print c
