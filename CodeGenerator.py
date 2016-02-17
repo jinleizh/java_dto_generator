@@ -75,7 +75,6 @@ class CodeGenerator(object):
         依次生成代码
         """
         protocol_data = CodeGenerator.init()
-        print protocol_data
 
         for sheet in protocol_data:
             CodeGenerator.need_import_list = False
@@ -167,7 +166,6 @@ class CodeGenerator(object):
                             is_valid_id = True
 
                     if not is_valid_id:
-                        print type(data[pos_id])
                         logger.warn("sheet_name=%s invalid field_id in row=%s, field_name=%s" % (sheet_origin_name, i, data[pos_name]))
                         continue
 
