@@ -2,7 +2,7 @@
 # coding=utf-8
 
 tpl_copy_right = """/**
- * (C) 2016 XXXXXX Group Holding Limited.
+ * (C) 2016 WeBank Group Holding Limited.
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the
  * GNU General Public License version 2 as published by the Free Software Foundation.
@@ -14,9 +14,9 @@ tpl_default_file_path = dict(
     output="./output/",
 )
 
-tpl_package_name = "package com.XXXX.ccs.dto;"
+tpl_package_name = "package com.webank.ccs.dto;"
 
-tpl_protocol_file = tpl_default_file_path.get("input") + "1.xls"
+tpl_protocol_file = tpl_default_file_path.get("input") + "default.xls"
 
 # 模版均可以修改, 但%s不能删除
 tpl_class_definition = "public class %s extends PmbankBaseDTO {"
@@ -48,7 +48,7 @@ tpl_option_json_property = False
 tpl_option_json_serialize = False
 tpl_option_comment = True
 tpl_default_import_list = [
-    "cn.XXXXX.framework.common.dto",
+    "cn.webank.framework.common.dto",
 ]
 
 import_json_property = [

@@ -75,6 +75,8 @@ class CodeGenerator(object):
         依次生成代码
         """
         protocol_data = CodeGenerator.init()
+        print protocol_data
+
         for sheet in protocol_data:
             CodeGenerator.need_import_list = False
             CodeGenerator.gen_code(sheet)
@@ -152,10 +154,21 @@ class CodeGenerator(object):
                         continue
 
                     # 兼容excel中序号为文本的情况, 将dto_field_id转为整型
+                    is_valid_id = False
                     if type(data[pos_id]) in (int, float) or str(data[pos_id]).strip().isdigit():
                         dto_field_id = int(data[pos_id])
+                        is_valid_id = True
                     else:
-                        logger.warn("sheet_name=%s invalid field_id in row=%s" % (sheet_origin_name, i))
+                        # 截取小数点前的数值, 作为field_id
+                        tmp = str(data[pos_id]).strip()
+                        dot_pos = tmp.find('.')
+                        if dot_pos > 0 and tmp[0:dot_pos].isdigit():
+                            dto_field_id = int(tmp[0:dot_pos])
+                            is_valid_id = True
+
+                    if not is_valid_id:
+                        print type(data[pos_id])
+                        logger.warn("sheet_name=%s invalid field_id in row=%s, field_name=%s" % (sheet_origin_name, i, data[pos_name]))
                         continue
 
                     dto_field_name = str("" if data[pos_name] is None else data[pos_name]).strip()
@@ -201,6 +214,10 @@ class CodeGenerator(object):
                 index += 1
 
             return protocol_data
+        else:
+            logger.error("protocol_file=%s not exist" % protocol_file)
+            print "protocol_file=%s not exist" % protocol_file
+            return []
 
     @staticmethod
     def gen_copyright(fp):
@@ -460,6 +477,9 @@ class CodeGenerator(object):
         """
         CodeTemplate.java_template["default_import_list"] = modules
 
+"""
+仅用于自测
+"""
 if __name__ == "__main__":
     logger.debug("gen start")
     package_name = raw_input("Please input java package name(like com.xxx.xxx):")
@@ -473,7 +493,7 @@ if __name__ == "__main__":
         #"com.webank.test",
     ]
     CodeGenerator.extend_import_module(module_list)
-    CodeGenerator.set_protocol_file("D:\docs\protocol_v1.xls")
+    CodeGenerator.set_protocol_file("D:\docs\protocol_v2_0217.xls")
 
     start_time = time.clock()
     CodeGenerator.run()

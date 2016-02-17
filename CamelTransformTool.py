@@ -60,10 +60,9 @@ class CamelTransformTool(object):
         return field
 
 
+"""
+仅用于自测
+"""
 if __name__ == "__main__":
     print CamelTransformTool.trans_underline_field_to_camel_field("OPEN_ID_HELLO_WORLD")
     print CamelTransformTool.trans_underline_field_to_camel_classname("open_id_sheet")
-    print str(None)
-    if True:
-        c = 5
-    print c
