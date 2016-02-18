@@ -13,9 +13,11 @@ type_dict = dict(
         string="String",
         date="Date",
         list="List<?>",
+        array="String[]",
         n="int",
         c="String",
-        b="int",
-        t="String",
+        b="BigDecimal",
+        t="Date",
+        d="Date",
         h="String",
 )

@@ -3,6 +3,7 @@
 import os
 
 import time
+
 import xlrd
 
 import CodeTemplate
@@ -17,6 +18,8 @@ from ExcelDesc import excel_desc
 
 import sys
 
+import Constant
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -25,7 +28,11 @@ class CodeGenerator(object):
     """
     代码生成工具
     """
-    need_import_list = False
+    statics_dict = {
+        "invalid_field_id_num": 0,
+        "invalid_field_name_num": 0,
+        "invalid_field_type_num": 0,
+    }
 
     def __init__(self):
         pass
@@ -38,7 +45,7 @@ class CodeGenerator(object):
         :param fp: 文件对象
         :param content: 要写入的内容
         """
-        if content is not None and num >= 1:
+        if content is not None:
             fp.write(content + '\n' * num)
         else:
             logger.info("empty content")
@@ -57,15 +64,27 @@ class CodeGenerator(object):
             logger.info("empty content")
 
     @staticmethod
+    def is_empty(val):
+        """
+        val判空
+        :param val:
+        :return:
+        """
+        if val is None or "" == val:
+            return True
+        return False
+
+    @staticmethod
     def gen_code(sheet):
         """
         实际处理逻辑, 抽取出来方便复用
         :param sheet: 包含sheet名称、sheet所拥有的数据
         """
-        fp = open(CodeTemplate.java_template.get("default_file_path").get("output") + sheet.get("sheet_name"), "w+")
+        fp = open(CodeTemplate.java_template.get("default_file_path").get("output") + sheet.get("sheet_name") + ".java",
+                  "w+")
         CodeGenerator.gen_copyright(fp)
         CodeGenerator.gen_package_name(fp)
-        CodeGenerator.gen_import(fp)
+        CodeGenerator.gen_import(fp, sheet.get("need_import_module"))
         CodeGenerator.gen_body(fp, sheet)
         fp.close()
 
@@ -77,7 +96,6 @@ class CodeGenerator(object):
         protocol_data = CodeGenerator.init()
 
         for sheet in protocol_data:
-            CodeGenerator.need_import_list = False
             CodeGenerator.gen_code(sheet)
 
     @staticmethod
@@ -100,6 +118,7 @@ class CodeGenerator(object):
             protocol_data = []
             while index < sheet_num:
                 dto_num = 0
+                need_import_module = []
                 sheet_origin_name = sheet_names[index].strip()
                 # 从excel读到的sheet名称,为unicode格式, 需转换为utf-8编码
                 sheet_origin_name = sheet_origin_name.encode('utf-8')
@@ -112,6 +131,7 @@ class CodeGenerator(object):
                 content = {
                     "sheet_name": sheet_name,
                     "dto_elems": [],
+                    "need_import_module": [],
                 }
                 table = sheets[index]
                 nrows = table.nrows
@@ -145,7 +165,8 @@ class CodeGenerator(object):
                 for i in xrange(nrows):
                     data = table.row_values(i)
                     if len(data) < min_field_num:
-                        logger.warn("sheet_name=%s row=%s miss some cols, you need at least %s cols" % (sheet_name, i, min_field_num))
+                        logger.warn("sheet_name=%s row=%s miss some cols, you need at least %s cols" % (
+                            sheet_name, i, min_field_num))
                         continue
 
                     if data[pos_id] is None:
@@ -166,11 +187,20 @@ class CodeGenerator(object):
                             is_valid_id = True
 
                     if not is_valid_id:
-                        logger.warn("sheet_name=%s invalid field_id in row=%s, field_name=%s" % (sheet_origin_name, i, data[pos_name]))
+                        logger.warn("sheet_name=%s invalid field_id in row=%s, field_name=%s" % (
+                            sheet_origin_name, i, data[pos_name]))
                         continue
 
-                    dto_field_name = str("" if data[pos_name] is None else data[pos_name]).strip()
-                    dto_field_type = str("" if data[pos_type] is None else data[pos_type]).strip()
+                    if CodeGenerator.is_empty(data[pos_name]):
+                        logger.warn("field_name is not exit")
+                        continue
+
+                    dto_field_name = str(data[pos_name]).strip()
+                    dto_field_type = str(CodeTemplate.java_template.get("default_field_type") if CodeGenerator.is_empty(
+                            data[pos_type]) else data[pos_type]).strip()
+                    if dto_field_type == '':
+                        print "hit empty type"
+
                     pos = dto_field_type.find('(')
                     if pos > 0:
                         dto_field_type = dto_field_type[0:pos]
@@ -184,17 +214,29 @@ class CodeGenerator(object):
                     # 2.初始化content
                     if 1 == dto_field_id:
                         if 0 == dto_num:
-                            content["sheet_name"] = sheet_name + "ReqDto"
+                            content["sheet_name"] = sheet_name + CodeTemplate.java_template.get(
+                                "default_request_filename_postfix")
                             dto_num += 1
                         else:
+                            content["need_import_module"] = need_import_module
                             CodeGenerator.gen_code(content)
-                            CodeGenerator.need_import_list = False
-                            content["sheet_name"] = sheet_name + "RspDto"
+                            content["sheet_name"] = sheet_name + CodeTemplate.java_template.get(
+                                "default_response_filename_postfix")
                             content["dto_elems"] = []
+                            content["need_import_module"] = []
 
                     # 是否包含list类型字段
-                    if dto_field_type.lower() == "list":
-                        CodeGenerator.need_import_list = True
+                    tmp_type = dto_field_type.lower()
+                    if tmp_type in ["list", ] and "list" not in need_import_module:
+                        need_import_module.append("list")
+
+                    # 是否包含date类型
+                    if tmp_type in ["t", "d", "date"] and "date" not in need_import_module:
+                        need_import_module.append("date")
+
+                    # 是否包含decimal类型
+                    if tmp_type in ["b", ] and "big_decimal" not in need_import_module:
+                        need_import_module.append("big_decimal")
 
                     if dto_field_name is None or dto_field_type is None:
                         logger.error("dto_field_name or dto_field_type miss, please check you protocol file")
@@ -208,7 +250,9 @@ class CodeGenerator(object):
                     content["dto_elems"].append(dto_elem)
 
                 if dto_num > 0:
+                    content["need_import_module"] = need_import_module
                     protocol_data.append(content)
+
                 index += 1
 
             return protocol_data
@@ -226,13 +270,20 @@ class CodeGenerator(object):
         CodeGenerator.writeline_with_endl(fp, CodeTemplate.java_template.get("copy_right"))
 
     @staticmethod
-    def gen_import(fp):
+    def gen_import(fp, modules):
         """
         import模块
+        :param modules: 需要import的模块列表
         :param fp:
         """
-        if CodeGenerator.need_import_list:
-            text = "import java.util.List;"
+        for module in modules:
+            if module == "list":
+                text = "import java.util.List;"
+            elif module == "date":
+                text = "import java.util.Date;"
+            elif module == "big_decimal":
+                text = "import java.math.BigDecimal;"
+
             CodeGenerator.writeline_with_endl(fp, text)
 
         for import_elem in CodeTemplate.java_template.get("default_import_list"):
@@ -324,21 +375,22 @@ class CodeGenerator(object):
         CodeGenerator.writeline_with_endl(fp, text)
 
     @staticmethod
-    def function_comment(fp, param, return_type):
+    def function_comment(fp, param="", param_desc=""):
         """
         函数注释
+        :param param_desc: 参数描述
+        :param param: 参数
         :param fp:
         """
         if CodeTemplate.java_template.get("option_comment"):
-            text = CodeTemplate.java_template.get("function_comment") % (param)
+            text = CodeTemplate.java_template.get("function_comment") % (param, param_desc)
             CodeGenerator.writeline_with_endl(fp, text, 1)
 
     @staticmethod
-    def json_property(fp, func_type, field_name):
+    def json_property(fp, field_name):
         """
         生成json property注解
         :param fp:
-        :param func_type:
         :param field_name:
         """
         if CodeTemplate.java_template.get("option_json_property"):
@@ -381,12 +433,22 @@ class CodeGenerator(object):
 
             for elem in dto_elems:
                 elem_type = TypeDict.type_dict.get(elem.get("type").lower())
-                elem_field_name = CamelTransformTool.trans_underline_field_to_camel_field(elem.get("name"))
-                if elem_type is None or elem_field_name is None:
+                if elem_type is None:
+                    logger.error("Unknown or miss field type, elem=%s" % str(elem))
                     continue
 
+                elem_field_name = CamelTransformTool.trans_underline_field_to_camel_field(elem.get("name"))
+                if elem_field_name is None:
+                    logger.error("miss field_name, elem=%s" % str(elem))
+                    continue
+
+                # 定义属性
                 elem_property_comment = elem.get("comment")
                 CodeGenerator.property_comment(fp, elem_property_comment)
+                # 在属性上添加注解, 默认的注解方式
+                if CodeTemplate.java_template.get("style_json_property") == Constant.json_property_style.get(
+                        "above_property"):
+                    CodeGenerator.json_property(fp, elem.get("name"))
                 CodeGenerator.property_define(fp, elem_type, elem_field_name)
 
             for elem in dto_elems:
@@ -396,14 +458,20 @@ class CodeGenerator(object):
                 if elem_type is None or elem_field_name is None:
                     continue
 
-                CodeGenerator.function_comment(fp, elem_field_name, 'void')
-                CodeGenerator.json_property(fp, 'set', elem_field_name)
+                # 定义set函数
+                elem_property_comment = elem.get("comment")
+                CodeGenerator.function_comment(fp, elem_field_name, elem_property_comment)
+                if CodeTemplate.java_template.get("style_json_property") == Constant.json_property_style.get(
+                        "above_function"):
+                    CodeGenerator.json_property(fp, elem.get("name"))
                 CodeGenerator.json_serialize(fp)
                 CodeGenerator.function_define_set(fp, elem_type, elem_field_name, elem_field_name_cap)
 
-                CodeGenerator.function_comment(fp, '', elem_type)
-                # 反序列化需要使用原生的协议文件中的字段名
-                CodeGenerator.json_property(fp, 'get', elem.get("name"))
+                # 定义get函数
+                CodeGenerator.function_comment(fp)
+                if CodeTemplate.java_template.get("style_json_property") == Constant.json_property_style.get(
+                        "above_function"):
+                    CodeGenerator.json_property(fp, elem_field_name)
                 CodeGenerator.json_serialize(fp)
                 CodeGenerator.function_define_get(fp, elem_type, elem_field_name, elem_field_name_cap)
 
@@ -475,6 +543,15 @@ class CodeGenerator(object):
         """
         CodeTemplate.java_template["default_import_list"] = modules
 
+    @staticmethod
+    def set_json_property_style(style_type):
+        """
+        设置json property方式
+        :param style_type: json property 1-get和set使用相同的字段名 2-使用excel中的字段名
+        """
+        CodeTemplate.java_template["style_json_property"] = style_type
+
+
 """
 仅用于自测
 """
@@ -486,9 +563,10 @@ if __name__ == "__main__":
     CodeGenerator.set_option_comment(True)
     CodeGenerator.set_option_json_property(True)
     CodeGenerator.set_option_json_serialize(False)
-    CodeGenerator.set_option_json_serialize(True)
+    CodeGenerator.set_json_property_style(Constant.json_property_style.get("get_set_same_style"))
+
     module_list = [
-        #"com.webank.test",
+        # "com.webank.test",
     ]
     CodeGenerator.extend_import_module(module_list)
     CodeGenerator.set_protocol_file("D:\docs\protocol_v2_0217.xls")

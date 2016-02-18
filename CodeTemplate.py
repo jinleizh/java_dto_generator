@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
+import Constant
 
 tpl_copy_right = """/**
  * (C) 2016 WeBank Group Holding Limited.
@@ -10,11 +11,11 @@ tpl_copy_right = """/**
  */"""
 
 tpl_default_file_path = dict(
-    input="./resource/",
-    output="./output/",
+        input="./resource/",
+        output="./output/",
 )
 
-tpl_package_name = "package com.webank.ccs.dto;"
+tpl_package_name = "package cn.webank.pmbank.ccs.installmentloan.common.dto;"
 
 tpl_protocol_file = tpl_default_file_path.get("input") + "default.xls"
 
@@ -38,17 +39,20 @@ tpl_function_definition_get = """    public %s get%s() {
 
 tpl_function_comment = """    /**
     *
-    * @param %s
+    * @param %s %s
     */"""
 
 tpl_json_property = "    @JsonProperty(\"%s\")"
 tpl_json_serialize = "    @JsonSerialize(\"%s\")"
 tpl_json_deserialize = "    @JsonDeserialize(\"%s\")"
+
 tpl_option_json_property = False
 tpl_option_json_serialize = False
 tpl_option_comment = True
+tpl_style_json_property = Constant.json_property_style.get("above_property")
+
 tpl_default_import_list = [
-    "cn.webank.framework.common.dto",
+    "cn.webank.pmbank.framework.common.dto.PmbankBaseDTO",
 ]
 
 import_json_property = [
@@ -58,6 +62,11 @@ import_json_property = [
 import_json_serialize = [
     "com.fasterxml.jackson.databind.annotation.JsonSerialize",
 ]
+
+tpl_default_field_type = "String"
+tpl_default_field_name = "Unknow"
+tpl_default_request_filename_postfix = "ReqDTO"
+tpl_default_response_filename_postfix = "RspDTO"
 
 java_template = dict(
         copy_right=tpl_copy_right,
@@ -78,4 +87,9 @@ java_template = dict(
         option_comment=tpl_option_comment,
         default_import_list=tpl_default_import_list,
         default_file_path=tpl_default_file_path,
+        default_field_type=tpl_default_field_type,
+        default_field_name=tpl_default_field_name,
+        style_json_property=tpl_style_json_property,
+        default_request_filename_postfix=tpl_default_request_filename_postfix,
+        default_response_filename_postfix=tpl_default_response_filename_postfix,
 )
