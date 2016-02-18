@@ -219,6 +219,7 @@ class CodeGenerator(object):
                             dto_num += 1
                         else:
                             content["need_import_module"] = need_import_module
+                            need_import_module = []
                             CodeGenerator.gen_code(content)
                             content["sheet_name"] = sheet_name + CodeTemplate.java_template.get(
                                 "default_response_filename_postfix")
