@@ -15,8 +15,9 @@ CodeGenerator.set_package_name(package_name)
 CodeGenerator.set_option_comment(True)
 CodeGenerator.set_option_json_property(True)
 CodeGenerator.set_option_json_serialize(False)
-CodeGenerator.set_json_property_style(Constant.json_property_style.get("above_property"))
-# CodeGenerator.set_json_property_style(Constant.json_property_style.get("above_function"))
+# CodeGenerator.set_json_property_style(Constant.json_property_style.get("above_property"))
+# CodeGenerator.set_json_property_style(Constant.json_property_style.get("above_function_set_lower_case"))
+CodeGenerator.set_json_property_style(Constant.json_property_style.get("above_function_set_upper_case"))
 
 module_list = [
     #"com.webank.test",

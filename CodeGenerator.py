@@ -463,16 +463,26 @@ class CodeGenerator(object):
                 elem_property_comment = elem.get("comment")
                 CodeGenerator.function_comment(fp, elem_field_name, elem_property_comment)
                 if CodeTemplate.java_template.get("style_json_property") == Constant.json_property_style.get(
-                        "above_function"):
+                        "above_function_set_upper_case"):
                     CodeGenerator.json_property(fp, elem.get("name"))
+
+                if CodeTemplate.java_template.get("style_json_property") == Constant.json_property_style.get(
+                        "above_function_set_lower_case"):
+                    CodeGenerator.json_property(fp, elem_field_name)
+
                 CodeGenerator.json_serialize(fp)
                 CodeGenerator.function_define_set(fp, elem_type, elem_field_name, elem_field_name_cap)
 
                 # 定义get函数
                 CodeGenerator.function_comment(fp)
                 if CodeTemplate.java_template.get("style_json_property") == Constant.json_property_style.get(
-                        "above_function"):
+                        "above_function_set_upper_case"):
                     CodeGenerator.json_property(fp, elem_field_name)
+
+                if CodeTemplate.java_template.get("style_json_property") == Constant.json_property_style.get(
+                        "above_function_set_lower_case"):
+                    CodeGenerator.json_property(fp, elem.get("name"))
+
                 CodeGenerator.json_serialize(fp)
                 CodeGenerator.function_define_get(fp, elem_type, elem_field_name, elem_field_name_cap)
 
