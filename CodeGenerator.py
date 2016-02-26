@@ -215,14 +215,18 @@ class CodeGenerator(object):
                     if 1 == dto_field_id:
                         if 0 == dto_num:
                             content["sheet_name"] = sheet_name + CodeTemplate.java_template.get(
-                                "default_request_filename_postfix")
+                                    "default_request_filename_postfix")
                             dto_num += 1
+                            content["flag_set_lower"] = 1  # 发序列化支持小写
+                            CodeGenerator.set_json_property_style(Constant.json_property_style.get("above_function_set_lower_case"))
                         else:
                             content["need_import_module"] = need_import_module
                             need_import_module = []
                             CodeGenerator.gen_code(content)
                             content["sheet_name"] = sheet_name + CodeTemplate.java_template.get(
-                                "default_response_filename_postfix")
+                                    "default_response_filename_postfix")
+                            content["flag_set_lower"] = 0  # 发序列化支持大写
+                            CodeGenerator.set_json_property_style(Constant.json_property_style.get("above_function_set_upper_case"))
                             content["dto_elems"] = []
                             content["need_import_module"] = []
 

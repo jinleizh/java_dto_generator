@@ -20,7 +20,7 @@ tpl_package_name = "package cn.webank.pmbank.ccs.installmentloan.common.dto;"
 tpl_protocol_file = tpl_default_file_path.get("input") + "default.xls"
 
 # 模版均可以修改, 但%s不能删除
-tpl_class_definition = "public class %s extends PmbankBaseDTO {"
+tpl_class_definition = "public class %s {"
 tpl_class_definition_end = "}"
 
 tpl_property_definition = "    private %s %s;"
@@ -52,7 +52,6 @@ tpl_option_comment = True
 tpl_style_json_property = Constant.json_property_style.get("above_property")
 
 tpl_default_import_list = [
-    "cn.webank.pmbank.framework.common.dto.PmbankBaseDTO",
 ]
 
 import_json_property = [

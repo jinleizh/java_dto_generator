@@ -9,6 +9,7 @@ service_didi = {
     # 维护sheet名与所对应的dto类名之间的映射
     "sheets_name_dict": {
         "开户申请": "OpenAccount",
+        "开户信息补充": "CompleteOpenAccountInfo",
         "密码设置": "SetPasswd",
         "修改密码": "ModifyPasswd",
         "重置密码": "ResetPasswd",
@@ -17,10 +18,12 @@ service_didi = {
         "放款申请": "LoanApply",
         "客户向下还款计划": "UserRefundPlan",
         "客户向下所有借款记录": "UserLoanRecord",
+        "客户向下所有还款记录": "UserRefundRecord",
         "单笔借据对应的还款计划": "ReceiptRefundPlan",
         "单笔借款详情": "ReceiptLoanDetail",
         "提前结清查询（含详情）": "EarlySettlementQuery",
-        "提前结清申请动作": "EarlySettlementApply",
+        "提前结清申请": "EarlySettlementApply",
+        "逾期查询": "QueryOverdue",
     },
 
     # 字段在excel文件中的列位置, 从0开始计数, 例如第一列，即为0
