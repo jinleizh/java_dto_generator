@@ -16,6 +16,8 @@ import TypeDict
 
 from ExcelDesc import excel_desc
 
+import Target
+
 import sys
 
 import Constant
@@ -75,13 +77,17 @@ class CodeGenerator(object):
         return False
 
     @staticmethod
-    def gen_code(sheet):
+    def gen_code(sheet, target):
         """
         实际处理逻辑, 抽取出来方便复用
+        :param target: 目标目录
         :param sheet: 包含sheet名称、sheet所拥有的数据
         """
-        fp = open(CodeTemplate.java_template.get("default_file_path").get("output") + sheet.get("sheet_name") + ".java",
-                  "w+")
+        dir_path = CodeTemplate.java_template.get("default_file_path").get("output_" + target)
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+
+        fp = open(dir_path + sheet.get("sheet_name") + ".java", "w+")
         CodeGenerator.gen_copyright(fp)
         CodeGenerator.gen_package_name(fp)
         CodeGenerator.gen_import(fp, sheet.get("need_import_module"))
@@ -89,19 +95,21 @@ class CodeGenerator(object):
         fp.close()
 
     @staticmethod
-    def run():
+    def run(target):
         """
         依次生成代码
+        :param target: 服务对象
         """
-        protocol_data = CodeGenerator.init()
+        protocol_data = CodeGenerator.init(target)
 
         for sheet in protocol_data:
-            CodeGenerator.gen_code(sheet)
+            CodeGenerator.gen_code(sheet, target)
 
     @staticmethod
-    def init():
+    def init(target):
         """
         解析excel文件，收集要处理的数据
+        :param target: 目标生成文件
         """
         protocol_file = CodeTemplate.java_template.get("protocol_file")
         if os.path.isfile(protocol_file):
@@ -217,16 +225,15 @@ class CodeGenerator(object):
                             content["sheet_name"] = sheet_name + CodeTemplate.java_template.get(
                                     "default_request_filename_postfix")
                             dto_num += 1
-                            content["flag_set_lower"] = 1  # 发序列化支持小写
-                            CodeGenerator.set_json_property_style(Constant.json_property_style.get("above_function_set_lower_case"))
+                            CodeGenerator.setRequestPropertyStyle(target)
+
                         else:
                             content["need_import_module"] = need_import_module
                             need_import_module = []
-                            CodeGenerator.gen_code(content)
+                            CodeGenerator.gen_code(content,  target)
                             content["sheet_name"] = sheet_name + CodeTemplate.java_template.get(
                                     "default_response_filename_postfix")
-                            content["flag_set_lower"] = 0  # 发序列化支持大写
-                            CodeGenerator.set_json_property_style(Constant.json_property_style.get("above_function_set_upper_case"))
+                            CodeGenerator.setResponsePropertyStyle(target)
                             content["dto_elems"] = []
                             content["need_import_module"] = []
 
@@ -454,6 +461,7 @@ class CodeGenerator(object):
                 if CodeTemplate.java_template.get("style_json_property") == Constant.json_property_style.get(
                         "above_property"):
                     CodeGenerator.json_property(fp, elem.get("name"))
+
                 CodeGenerator.property_define(fp, elem_type, elem_field_name)
 
             for elem in dto_elems:
@@ -466,6 +474,7 @@ class CodeGenerator(object):
                 # 定义set函数
                 elem_property_comment = elem.get("comment")
                 CodeGenerator.function_comment(fp, elem_field_name, elem_property_comment)
+
                 if CodeTemplate.java_template.get("style_json_property") == Constant.json_property_style.get(
                         "above_function_set_upper_case"):
                     CodeGenerator.json_property(fp, elem.get("name"))
@@ -491,6 +500,40 @@ class CodeGenerator(object):
                 CodeGenerator.function_define_get(fp, elem_type, elem_field_name, elem_field_name_cap)
 
             CodeGenerator.class_define_end(fp)
+
+    @staticmethod
+    def setRequestPropertyStyle(target):
+        """
+        设置请求的json property样式
+        :param target: 生成的文件给target用, 与业务强相关，非通用逻辑
+        """
+        if target == Target.Target_openapi:
+            CodeGenerator.set_option_json_property(False)  # openapi 不需要json property
+        elif target == Target.Target_pmbank:
+            CodeGenerator.set_option_json_property(True)
+            CodeGenerator.set_json_property_style(Constant.json_property_style.get("above_function_set_lower_case"))
+        elif target == Target.Target_normal:
+            CodeGenerator.set_option_json_property(True)
+            CodeGenerator.set_json_property_style(Constant.json_property_style.get("above_property"))
+        else:
+            CodeGenerator.set_option_json_property(False)
+
+    @staticmethod
+    def setResponsePropertyStyle(target):
+        """
+        设置响应的json property样式
+        :param target: 生成的文件给target用, 与业务强相关，非通用逻辑
+        """
+        if target == Target.Target_openapi:
+            CodeGenerator.set_option_json_property(False)  # openapi 不需要json property
+        elif target == Target.Target_pmbank:
+            CodeGenerator.set_option_json_property(True)
+            CodeGenerator.set_json_property_style(Constant.json_property_style.get("above_function_set_upper_case"))
+        elif target == Target.Target_normal:
+            CodeGenerator.set_option_json_property(True)
+            CodeGenerator.set_json_property_style(Constant.json_property_style.get("above_property"))
+        else:
+            CodeGenerator.set_option_json_property(False)
 
     # 以下接口提供给用户使用,
     # 通过代码覆盖配置文件, 而不是直接到配置文件中修改
@@ -572,13 +615,12 @@ class CodeGenerator(object):
 """
 if __name__ == "__main__":
     logger.debug("gen start")
-    package_name = raw_input("Please input java package name(like com.xxx.xxx):")
+    # package_name = raw_input("Please input java package name(like com.xxx.xxx):")
+    package_name = "com.test"
     CodeGenerator.set_package_name(package_name)
 
     CodeGenerator.set_option_comment(True)
-    CodeGenerator.set_option_json_property(True)
     CodeGenerator.set_option_json_serialize(False)
-    CodeGenerator.set_json_property_style(Constant.json_property_style.get("get_set_same_style"))
 
     module_list = [
         # "com.webank.test",
@@ -587,7 +629,9 @@ if __name__ == "__main__":
     CodeGenerator.set_protocol_file("D:\docs\protocol_v2_0217.xls")
 
     start_time = time.clock()
-    CodeGenerator.run()
+    CodeGenerator.run(Target.Target_normal)
+    # CodeGenerator.run(Target.Target_openapi)
+    # CodeGenerator.run(Target.Target_pmbank)
     stop_time = time.clock()
     use_time = stop_time - start_time
 

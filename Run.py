@@ -6,28 +6,26 @@
 from LogTool import logger
 from CodeGenerator import CodeGenerator
 import time
-import Constant
+import Target
 
 logger.debug("gen start")
-package_name = raw_input("Please input java package name(like com.xxx.xxx):")
+# package_name = raw_input("Please input java package name(like com.xxx.xxx):")
+package_name = "com.test"
 CodeGenerator.set_package_name(package_name)
 
 CodeGenerator.set_option_comment(True)
-CodeGenerator.set_option_json_property(True)
 CodeGenerator.set_option_json_serialize(False)
-CodeGenerator.set_json_property_style(Constant.json_property_style.get("above_property"))
-# CodeGenerator.set_json_property_style(Constant.json_property_style.get("above_function_set_lower_case"))
-# CodeGenerator.set_json_property_style(Constant.json_property_style.get("above_function_set_upper_case"))
 
 module_list = [
-    #"com.webank.test",
 ]
 CodeGenerator.extend_import_module(module_list)
 
-CodeGenerator.set_protocol_file("D:\docs\protocol_v6_0225.xls")
+CodeGenerator.set_protocol_file("D:\docs\wepower\wms_protocol_v0.xlsx")
 
 start_time = time.clock()
-CodeGenerator.run()
+CodeGenerator.run(Target.Target_pmbank)
+CodeGenerator.run(Target.Target_openapi)
+CodeGenerator.run(Target.Target_normal)
 stop_time = time.clock()
 use_time = stop_time - start_time
 

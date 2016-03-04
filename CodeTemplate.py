@@ -12,7 +12,9 @@ tpl_copy_right = """/**
 
 tpl_default_file_path = dict(
         input="./resource/",
-        output="./output/",
+        output_normal="./output/normal/",  # 通用
+        output_openapi="./output/openapi/",  # 给openapi使用
+        output_pmbank="./output/pmbank/",  # 给pmbank使用
 )
 
 tpl_package_name = "package cn.webank.pmbank.ccs.installmentloan.common.dto;"
@@ -20,7 +22,7 @@ tpl_package_name = "package cn.webank.pmbank.ccs.installmentloan.common.dto;"
 tpl_protocol_file = tpl_default_file_path.get("input") + "default.xls"
 
 # 模版均可以修改, 但%s不能删除
-tpl_class_definition = "public class %s {"
+tpl_class_definition = "public class %s extends BaseDTO {"
 tpl_class_definition_end = "}"
 
 tpl_property_definition = "    private %s %s;"
