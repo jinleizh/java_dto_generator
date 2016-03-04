@@ -36,6 +36,8 @@ class CodeGenerator(object):
         "invalid_field_type_num": 0,
     }
 
+    service_name = "default"
+
     def __init__(self):
         pass
 
@@ -83,7 +85,8 @@ class CodeGenerator(object):
         :param target: 目标目录
         :param sheet: 包含sheet名称、sheet所拥有的数据
         """
-        dir_path = CodeTemplate.java_template.get("default_file_path").get("output_" + target)
+        dir_path = CodeTemplate.java_template.get("default_file_path").get(
+            "output_" + target) % CodeGenerator.service_name
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
 
@@ -230,7 +233,7 @@ class CodeGenerator(object):
                         else:
                             content["need_import_module"] = need_import_module
                             need_import_module = []
-                            CodeGenerator.gen_code(content,  target)
+                            CodeGenerator.gen_code(content, target)
                             content["sheet_name"] = sheet_name + CodeTemplate.java_template.get(
                                     "default_response_filename_postfix")
                             CodeGenerator.setResponsePropertyStyle(target)
@@ -609,6 +612,14 @@ class CodeGenerator(object):
         """
         CodeTemplate.java_template["style_json_property"] = style_type
 
+    @staticmethod
+    def set_service_name(name):
+        """
+        服务名，决定了dto的输出目录
+        :param name:
+        """
+        CodeGenerator.service_name = name
+
 
 """
 仅用于自测
@@ -627,6 +638,7 @@ if __name__ == "__main__":
     ]
     CodeGenerator.extend_import_module(module_list)
     CodeGenerator.set_protocol_file("D:\docs\protocol_v2_0217.xls")
+    CodeGenerator.set_service_name("wepower")
 
     start_time = time.clock()
     CodeGenerator.run(Target.Target_normal)

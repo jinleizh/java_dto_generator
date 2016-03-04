@@ -20,7 +20,9 @@ module_list = [
 ]
 CodeGenerator.extend_import_module(module_list)
 
-CodeGenerator.set_protocol_file("D:\docs\wepower\wms_protocol_v0.xlsx")
+# CodeGenerator.set_protocol_file("D:\docs\wepower\wms_protocol_v0.xlsx")
+CodeGenerator.set_protocol_file("D:\docs\wepower\wms_protocol_v2.xlsx")
+CodeGenerator.set_service_name("wepower")
 
 start_time = time.clock()
 CodeGenerator.run(Target.Target_pmbank)

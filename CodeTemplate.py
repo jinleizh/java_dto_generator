@@ -12,9 +12,9 @@ tpl_copy_right = """/**
 
 tpl_default_file_path = dict(
         input="./resource/",
-        output_normal="./output/normal/",  # 通用
-        output_openapi="./output/openapi/",  # 给openapi使用
-        output_pmbank="./output/pmbank/",  # 给pmbank使用
+        output_normal="./output/%s/normal/",  # 通用
+        output_openapi="./output/%s/openapi/",  # 给openapi使用
+        output_pmbank="./output/%s/pmbank/",  # 给pmbank使用
 )
 
 tpl_package_name = "package cn.webank.pmbank.ccs.installmentloan.common.dto;"

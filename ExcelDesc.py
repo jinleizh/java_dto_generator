@@ -6,6 +6,8 @@
 未来可以开放成web服务提供给业务
 """
 service_didi = {
+    "service_name": "didi",
+
     # 维护sheet名与所对应的dto类名之间的映射
     "sheets_name_dict": {
         "开户申请": "OpenAccount",
@@ -48,10 +50,9 @@ service_didi = {
     }
 }
 
-# 滴滴项目
-service = service_didi
-
 service_wepower = {
+    "service_name": "wepower",
+
     # 维护sheet名与所对应的dto类名之间的映射
     "sheets_name_dict": {
         "微金融-绑卡": "BindCard",
@@ -85,6 +86,7 @@ service = service_wepower
 
 # excel描述信息，代码生成工具会解析此处的配置信息，用于生成Dto代码
 excel_desc = dict(
+        service_name=service.get("service_name"),
         sheets_name_dict=service.get("sheets_name_dict"),
         sheets_row_format=service.get("sheets_row_format"),
         sheets_field_position=service.get("sheets_field_position"),
