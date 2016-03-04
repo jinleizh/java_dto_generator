@@ -14,13 +14,15 @@ from CamelTransformTool import CamelTransformTool
 
 import TypeDict
 
-from ExcelDesc import excel_desc
+from ExcelConf import excel_conf
 
 import Target
 
 import sys
 
 import Constant
+
+from ErrorUtil import ErrorUtil
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -30,11 +32,6 @@ class CodeGenerator(object):
     """
     代码生成工具
     """
-    statics_dict = {
-        "invalid_field_id_num": 0,
-        "invalid_field_name_num": 0,
-        "invalid_field_type_num": 0,
-    }
 
     service_name = "default"
 
@@ -86,7 +83,7 @@ class CodeGenerator(object):
         :param sheet: 包含sheet名称、sheet所拥有的数据
         """
         dir_path = CodeTemplate.java_template.get("default_file_path").get(
-            "output_" + target) % CodeGenerator.service_name
+                "output_" + target) % CodeGenerator.service_name
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
 
@@ -111,8 +108,8 @@ class CodeGenerator(object):
     @staticmethod
     def init(target):
         """
-        解析excel文件，收集要处理的数据
-        :param target: 目标生成文件
+        解析excel文件，收集要处理的数据, 为target目标对象生成dto
+        :param target: 目标对象有:openapi\pmbank\通用
         """
         protocol_file = CodeTemplate.java_template.get("protocol_file")
         if os.path.isfile(protocol_file):
@@ -122,7 +119,7 @@ class CodeGenerator(object):
             sheet_num = len(sheets)
 
             if 0 >= sheet_num:
-                logger.warn("data not found in excel")
+                logger.error("data not found in excel")
                 return
 
             index = 0
@@ -133,7 +130,7 @@ class CodeGenerator(object):
                 sheet_origin_name = sheet_names[index].strip()
                 # 从excel读到的sheet名称,为unicode格式, 需转换为utf-8编码
                 sheet_origin_name = sheet_origin_name.encode('utf-8')
-                sheet_name = excel_desc.get("sheets_name_dict").get(sheet_origin_name)
+                sheet_name = excel_conf.get("sheets_name_dict").get(sheet_origin_name)
                 if sheet_name is None:
                     index += 1
                     logger.warn("sheet_name=%s not in dict, no need to parse" % sheet_origin_name)
@@ -148,7 +145,7 @@ class CodeGenerator(object):
                 nrows = table.nrows
 
                 # 加载excel描述规则
-                row_format = excel_desc.get("sheets_row_format")
+                row_format = excel_conf.get("sheets_row_format")
                 if row_format is None:
                     logger.error("miss option sheets_row_format")
                     return
@@ -158,7 +155,7 @@ class CodeGenerator(object):
                     logger.error("miss option field_min_num")
                     return
 
-                field_pos = excel_desc.get("sheets_field_position")
+                field_pos = excel_conf.get("sheets_field_position")
                 if field_pos is None:
                     logger.error("miss option sheets_field_position")
                     return
@@ -181,7 +178,9 @@ class CodeGenerator(object):
                         continue
 
                     if data[pos_id] is None:
-                        logger.warn("sheet_name=%s row=%s miss field_id" % (sheet_origin_name, i))
+                        logger.error("sheet_name=%s row=%s miss field_id" % (sheet_origin_name, i))
+                        ErrorUtil.addInvalidFieldId(target, sheet_name,
+                                                    data[pos_name] if data[pos_name] is not None else "unknown")
                         continue
 
                     # 兼容excel中序号为文本的情况, 将dto_field_id转为整型
@@ -198,19 +197,22 @@ class CodeGenerator(object):
                             is_valid_id = True
 
                     if not is_valid_id:
-                        logger.warn("sheet_name=%s invalid field_id in row=%s, field_name=%s" % (
+                        logger.error("sheet_name=%s invalid field_id in row=%s, field_name=%s" % (
                             sheet_origin_name, i, data[pos_name]))
+                        ErrorUtil.addInvalidFieldId(target, sheet_name,
+                                                    data[pos_name] if data[pos_name] is not None else "unknown")
                         continue
 
                     if CodeGenerator.is_empty(data[pos_name]):
-                        logger.warn("field_name is not exit")
+                        logger.error("sheet_name=%s have empty field_name, please check" % sheet_origin_name)
+                        ErrorUtil.addEmptyFieldName(target);
                         continue
 
                     dto_field_name = str(data[pos_name]).strip()
                     dto_field_type = str(CodeTemplate.java_template.get("default_field_type") if CodeGenerator.is_empty(
                             data[pos_type]) else data[pos_type]).strip()
                     if dto_field_type == '':
-                        print "hit empty type"
+                        ErrorUtil.addInvalidFieldType(target, sheet_name, dto_field_name)
 
                     pos = dto_field_type.find('(')
                     if pos > 0:
@@ -236,9 +238,9 @@ class CodeGenerator(object):
                             CodeGenerator.gen_code(content, target)
                             content["sheet_name"] = sheet_name + CodeTemplate.java_template.get(
                                     "default_response_filename_postfix")
-                            CodeGenerator.setResponsePropertyStyle(target)
                             content["dto_elems"] = []
                             content["need_import_module"] = []
+                            CodeGenerator.setResponsePropertyStyle(target)
 
                     # 是否包含list类型字段
                     tmp_type = dto_field_type.lower()
