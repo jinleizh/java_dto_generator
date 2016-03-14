@@ -54,6 +54,7 @@ tpl_option_comment = True
 tpl_style_json_property = Constant.json_property_style.get("above_property")
 
 tpl_default_import_list = [
+    "cn.webank.mumble.framework.dto.BaseDTO",
 ]
 
 import_json_property = [
