@@ -17,7 +17,7 @@ tpl_default_file_path = dict(
         output_pmbank="./output/%s/pmbank/",  # 给pmbank使用
 )
 
-tpl_package_name = "package cn.webank.pmbank.ccs.installmentloan.common.dto;"
+tpl_package_name = "package cn.webank.pmbank.wms.common.dto;"
 
 tpl_protocol_file = tpl_default_file_path.get("input") + "default.xls"
 

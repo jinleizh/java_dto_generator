@@ -244,7 +244,7 @@ class CodeGenerator(object):
 
                     # 是否包含list类型字段
                     tmp_type = dto_field_type.lower()
-                    if tmp_type in ["list", ] and "list" not in need_import_module:
+                    if tmp_type in ["list", "array"] and "list" not in need_import_module:
                         need_import_module.append("list")
 
                     # 是否包含date类型
@@ -252,7 +252,7 @@ class CodeGenerator(object):
                         need_import_module.append("date")
 
                     # 是否包含decimal类型
-                    if tmp_type in ["b", ] and "big_decimal" not in need_import_module:
+                    if tmp_type in ["b", "decimal", "bigdecimal"] and "big_decimal" not in need_import_module:
                         need_import_module.append("big_decimal")
 
                     if dto_field_name is None or dto_field_type is None:
