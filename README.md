@@ -7,7 +7,8 @@
   * 目前评审采用的是excel文件
 ###使用说明:
 在当前目录新建ExcelConf.py文件, 格式如下
-`#!/usr/bin/env python
+```python
+#!/usr/bin/env python
 # coding=utf-8
 
 service_mybusiness = {
@@ -53,5 +54,5 @@ excel_conf = dict(
         sheets_name_dict=service.get("sheets_name_dict"),
         sheets_row_format=service.get("sheets_row_format"),
         sheets_field_position=service.get("sheets_field_position"),
-)`
-
+)
+```
