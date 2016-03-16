@@ -1,6 +1,0 @@
-tree fc0c622e25fc1bb2cc958c7e234368d46238e8d9
-parent 61ceec1fe9eb3f9cfe082bcbe9f9ffe51cb1a905
-author unknown <ctrlzhang@ctrlzhang-PC2.tencent.com> 1455515791 +0800
-committer unknown <ctrlzhang@ctrlzhang-PC2.tencent.com> 1455515791 +0800
-
-1.增加excel描述规则 2.代码生成工具根据规则生成代码
