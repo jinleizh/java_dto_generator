@@ -1,13 +1,12 @@
 # java_dto_generator
 ###目标:
-  * 根据excel描述的协议字段, 生成java dto文件
+  根据excel描述的协议字段, 生成java dto文件
 ###背景:
   * 解决项目组手写dto比较费时的问题，有效缩短花费时间. 
   * 协议字段评审过后，通过该工具自动生成dto, 提高开发效率
   * 目前评审采用的是excel文件
-###使用说明:
   * 在当前目录新建ExcelConf.py文件, 格式如下
-```
+```python
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -56,4 +55,3 @@ excel_conf = dict(
         sheets_field_position=service.get("sheets_field_position"),
 )
 ```
-
