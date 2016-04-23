@@ -37,15 +37,18 @@ class CamelTransformTool(object):
         for symbol in ' _\t\n':
             field = field.strip(symbol)
 
-        word_list = re.sub(r'\s+|_+', '_', field).lower().split('_')
+        word_list = re.sub(r'\s+|_+', '_', field).split('_')
         word_len = len(word_list)
+        if word_len <= 1:
+            return field
+
         camel_field = ""
         for i in xrange(word_len):
             if 0 == i:
-                camel_field += word_list[i]
+                camel_field += word_list[i].lower()
                 continue
 
-            camel_field += word_list[i].capitalize()
+            camel_field += word_list[i].lower().capitalize()
 
         return camel_field
 
