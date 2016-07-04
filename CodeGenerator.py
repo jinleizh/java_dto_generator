@@ -168,7 +168,7 @@ class CodeGenerator(object):
                         ErrorUtil.addInvalidFieldId(target, sheet_name,
                                                     data[pos_name] if data[pos_name] is not None else "unknown")
                     elif type(data[pos_id]) == int or str(data[pos_id]).strip().isdigit():
-                            dto_field_id = int(data[pos_id])
+                        dto_field_id = int(data[pos_id])
                     elif type(data[pos_id]) == float:
                         if CommonUtil.isFloat(dto_field_id):
                             # 如果确实为浮点数, 则意味着需要生成嵌套的dto
@@ -206,7 +206,7 @@ class CodeGenerator(object):
                     # 字段名校验
                     if CommonUtil.is_empty(data[pos_name]):
                         logger.error("sheet_name=%s have empty field_name, please check" % sheet_origin_name)
-                        ErrorUtil.addEmptyFieldName(target);
+                        ErrorUtil.addEmptyFieldName(target)
                         continue
 
                     dto_field_name = str(data[pos_name]).strip()
@@ -264,7 +264,8 @@ class CodeGenerator(object):
                             if "list" not in need_import_module:
                                 need_import_module.append("list")
 
-                        dir_path = CodeTemplate.java_template.get("default_file_path").get("output_" + target) % CodeGenerator.service_name
+                        dir_path = CodeTemplate.java_template.get("default_file_path").get(
+                            "output_" + target) % CodeGenerator.service_name
                         if not os.path.exists(dir_path):
                             os.makedirs(dir_path)
 
@@ -273,13 +274,13 @@ class CodeGenerator(object):
                         # 不支持嵌套array的情况, 所以这里只有为false时，才会生成dto, 否则前面生成的数据会被覆盖
                         if not need_create_nest_dto:
                             nest_dto_filename = CamelTransformTool.trans_underline_field_to_camel_classname(
-                                dto_field_name) + "DTO"
+                                    dto_field_name) + "DTO"
                             nest_dto_fp = open(dir_path + nest_dto_filename + ".java", "w+")
                             nest_dto_elems = []
                             nest_dto_import_module = []
                         elif not lv2_need_create_nest_dto:
                             lv2_nest_dto_filename = CamelTransformTool.trans_underline_field_to_camel_classname(
-                                dto_field_name) + "DTO"
+                                    dto_field_name) + "DTO"
                             lv2_nest_dto_fp = open(dir_path + lv2_nest_dto_filename + ".java", "w+")
                             lv2_nest_dto_elems = []
                             lv2_nest_dto_import_module = []
@@ -321,6 +322,25 @@ class CodeGenerator(object):
                         nest_dto_elems.append(dto_elem)
                     else:
                         content["dto_elems"].append(dto_elem)
+
+                # 单个sheet处理结束后,把未生成的文件生成出来
+                # 一层嵌套
+                if need_create_nest_dto and not CommonUtil.is_empty(nest_dto_fp):
+                    nest_dto_content = {
+                        "sheet_name": nest_dto_filename,
+                        "dto_elems": nest_dto_elems,
+                        "need_import_module": nest_dto_import_module,
+                    }
+                    CodeGenerator.gen_code(nest_dto_content, target)
+
+                # 二层嵌套
+                if lv2_need_create_nest_dto and not CommonUtil.is_empty(lv2_nest_dto_fp):
+                    lv2_nest_dto_content = {
+                        "sheet_name": lv2_nest_dto_filename,
+                        "dto_elems": lv2_nest_dto_elems,
+                        "need_import_module": lv2_nest_dto_import_module,
+                    }
+                    CodeGenerator.gen_code(lv2_nest_dto_content, target)
 
                 if dto_num > 0:
                     content["need_import_module"] = need_import_module
