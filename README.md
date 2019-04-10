@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ctrlzhang/java_dto_generator.svg?branch=master)](https://travis-ci.org/ctrlzhang/java_dto_generator)
+
 # java_dto_generator
 ### 版本:
   * v1.1 
