@@ -32,7 +32,7 @@ service_mybusiness = {
     # 维护sheet名与所对应的dto类名之间的映射
     "sheets_name_dict": {
         "sheet1":"mybusiness1",
-        "sheet1":"mybusiness2",
+        "sheet2":"mybusiness2",
     },
 
     # 字段在excel文件中的列位置, 从0开始计数, 例如第一列，即为0
