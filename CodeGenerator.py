@@ -622,7 +622,7 @@ class CodeGenerator(object):
     def set_package_name(package):
         """
         设置生成代码的完整包名
-        :param package: 例如: com.webank.pmbank.ccs
+        :param package: 例如: com.xxx.yyy
         """
         CodeTemplate.java_template["package_name"] = "package " + package + ";"
 
@@ -712,11 +712,11 @@ if __name__ == "__main__":
     CodeGenerator.set_option_json_serialize(False)
 
     module_list = [
-        # "com.webank.test",
+        # "com.xxx.test",
     ]
     CodeGenerator.extend_import_module(module_list)
     CodeGenerator.set_protocol_file("D:\docs\protocol_v2_0217.xls")
-    CodeGenerator.set_service_name("wepower")
+    CodeGenerator.set_service_name("wexxxx")
 
     start_time = time.clock()
     CodeGenerator.run(Target.Target_normal)
